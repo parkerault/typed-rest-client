@@ -6,9 +6,9 @@ import ifm = require("./Interfaces");
 import util = require("./Util");
 
 export interface IRestResponse<T> {
-    statusCode: number,
-    result: T | null,
-    headers: Object
+  statusCode: number;
+  result: T;
+  headers: Object;
 }
 
 export interface IRequestOptions {
@@ -114,7 +114,7 @@ export class RestClient {
 
     /**
      * Updates resource(s) from an endpoint
-     * T type of object returned.  
+     * T type of object returned.
      * Be aware that not found returns a null.  Other error conditions reject the promise
      * @param {string} resource - fully qualified or relative url
      * @param {IRequestOptions} requestOptions - (optional) requestOptions object
@@ -201,14 +201,9 @@ export class RestClient {
 
             const response: IRestResponse<T> = {
                 statusCode: statusCode,
-                result: null,
+                result: undefined as unknown as T,
                 headers: {}
             };
-
-            // not found leads to null obj returned
-            if (statusCode == httpm.HttpCodes.NotFound) {
-                resolve(response);
-            }
 
             let obj: any;
             let contents: string;
@@ -236,6 +231,13 @@ export class RestClient {
             }
 
             // note that 3xx redirects are handled by the http layer.
+            if (response.result === undefined) {
+                let err: Error = new Error("Failed request (" + statusCode +"): Response body is empty.")
+                err['statusCode'] = statusCode;
+                err['result'] = undefined;
+                reject(err);
+            }
+
             if (statusCode > 299) {
                 let msg: string;
 

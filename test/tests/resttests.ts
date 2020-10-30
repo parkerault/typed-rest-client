@@ -43,7 +43,7 @@ describe('Rest Tests', function () {
     })
 
     it('gets a resource', async() => {
-        this.timeout(3000);
+        this.timeout(1001);
 
         let restRes: restm.IRestResponse<HttpBinData> = await _rest.get<HttpBinData>('https://httpbin.org/get');
         assert(restRes.statusCode == 200, "statusCode should be 200");
@@ -57,7 +57,7 @@ describe('Rest Tests', function () {
     });
 
     it('gets a resource passing Query Parameters', async() => {
-        this.timeout(3000);
+        this.timeout(1001);
         const response: restm.IRestResponse<HttpBinData> = await _rest.get<HttpBinData>('https://httpbin.org/get', _options);
 
         assert(response.statusCode == 200, "statusCode should be 200");
@@ -102,7 +102,7 @@ describe('Rest Tests', function () {
     });
 
     it('replaces a resource', async() => {
-        this.timeout(3000);
+        this.timeout(1001);
 
         let res: any = { name: 'foo' };
         let restRes: restm.IRestResponse<HttpBinData> = await _rest.replace<HttpBinData>('https://httpbin.org/put', res);
@@ -148,7 +148,7 @@ describe('Rest Tests', function () {
     });
 
     it('deletes a resource passing Query Parameters', async () => {
-        this.timeout(3000);
+        this.timeout(1001);
         const response: restm.IRestResponse<HttpBinData> = await _rest.del<HttpBinData>('https://httpbin.org/delete', _options);
 
         assert(response.statusCode == 200, "statusCode should be 200");
@@ -191,20 +191,19 @@ describe('Rest Tests', function () {
     //----------------------------------------------
 
     //
-    // Resource not found (404)
-    // should return a null resource, 404 status, and should not throw
+    // Unauthorized (401)
+    // should throw and attach statusCode to the Error object
+    // err.message is message proerty of resourceful error object or if not supplied, a generic error message
     //
-    it('gets a non-existant resource (404)', async() => {
-        this.timeout(3000);
-
+    it('gets and handles unauthorized (404)', async() => {
         try {
             let restRes: restm.IRestResponse<HttpBinData> = await _rest.get<HttpBinData>('https://httpbin.org/status/404');
-
-            assert(restRes.statusCode == 404, "statusCode should be 404");
-            assert(restRes.result === null, "object should be null");
+            console.log(restRes)
+            assert(false, "should throw");
         }
         catch(err) {
-            assert(false, "should not throw");
+            assert(err['statusCode'] == 404, "statusCode should be 404");
+            assert(err.message && err.message.length > 0, "should have error message");
         }
     });
 
@@ -244,7 +243,7 @@ describe('Rest Tests', function () {
     // Error with non JSON body
     // should return the text in the body if body is not JSON
     //
-    // it('gets and handles an error with non JSON body', async() => { 
+    // it('gets and handles an error with non JSON body', async() => {
     //     this.timeout(5000);
     //     try {
     //         let restRes: restm.IRestResponse<any> = await _rest.get('https://httpstat.us/406');
@@ -261,7 +260,7 @@ describe('Rest Tests', function () {
     // Path in baseUrl tests
     //--------------------------------------------------------
     it('maintains the path from the base url', async() => {
-        this.timeout(3000);
+        this.timeout(1001);
 
         // Arrange
         let rest = new restm.RestClient('typed-rest-client-tests', 'https://httpbin.org/anything');
@@ -336,7 +335,7 @@ describe('Rest Tests', function () {
 
     it('maintains the path from the base url where request has query parameters', async() => {
         // Arrange
-        this.timeout(3000);
+        this.timeout(1001);
         let rest = new restm.RestClient('typed-rest-client-tests', 'https://httpbin.org/anything/multiple');
 
         // Act
