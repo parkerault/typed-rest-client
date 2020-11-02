@@ -251,18 +251,31 @@ export class RestClient {
                     msg = "Failed request: (" + statusCode + ")";
                 }
 
-                let err: Error = new Error(msg);
-
-                // attach statusCode and body obj (if available) to the error object
-                err['statusCode'] = statusCode;
-                if (response.result) {
-                    err['result'] = response.result;
-                }
+                let err: Error = new RestResponseError(
+                    msg,
+                    statusCode,
+                    response.result,
+                );
 
                 reject(err);
             } else {
                 resolve(response);
             }
         });
+    }
+}
+
+export interface IRestResponseError extends Error {
+    statusCode: number;
+    result?: any;
+}
+
+class RestResponseError extends Error {
+    statusCode: number;
+    result: any;
+    constructor(message: string, statusCode: number, result?: any) {
+        super(message);
+        this.statusCode = statusCode;
+        this.result = result;
     }
 }
